@@ -168,14 +168,16 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 
 <div class="body">
 
-  <!-- ── SIDEBAR ── -->
   <div class="sb">
 
     <div class="sb-s">
       <div class="lbl">Gemini API Key</div>
-      <div class="fw">
-        <input class="f" id="ak" type="password" placeholder="AIza..." autocomplete="off">
-        <button class="eye" id="eye">👁</button>
+      <div style="display:flex; gap:6px;">
+        <div class="fw" style="flex:1;">
+          <input class="f" id="ak" type="password" placeholder="AIza..." autocomplete="off">
+          <button class="eye" id="eye">👁</button>
+        </div>
+        <button id="save-ak-btn" class="fetch-btn" style="width: 33px; padding: 0; font-size: 14px; display: flex; justify-content: center; align-items: center;" title="APIキーを保存">💾</button>
       </div>
       <div class="st"><div class="dot" id="dot"></div><span id="st-txt" style="font-size:11px;color:var(--muted);">APIキーを入力してください</span></div>
     </div>
@@ -235,19 +237,15 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     </div>
   </div>
 
-  <!-- ── MAIN ── -->
   <div class="mn">
 
-    <!-- Tabs -->
     <div class="tabs">
       <button class="tab on" data-tab="result">抽出結果</button>
       <button class="tab" data-tab="history">履歴 <span class="badge" id="hist-badge">0</span></button>
     </div>
 
-    <!-- Result panel -->
     <div class="panel on" id="panel-result">
 
-      <!-- Empty -->
       <div class="empty" id="es">
         <svg width="72" height="72" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" style="opacity:.35;">
           <rect x="12" y="8" width="44" height="56" rx="2" fill="none" stroke="#9a7c30" stroke-width="1.5"/>
@@ -264,13 +262,11 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
         <div class="empty-d">左側でファイルをアップロードして「テキストを抽出する」をクリックしてください。dマガジンのヘッダー・フッターなどのノイズは自動的に除去します。</div>
       </div>
 
-      <!-- Loading -->
       <div class="loading" id="ls" style="display:none;">
         <div class="ring"></div>
         <div class="ld-msg" id="ldm">準備中...</div>
       </div>
 
-      <!-- Error -->
       <div id="err-s" style="display:none;">
         <div class="err-box">
           <span style="font-size:18px;color:var(--accent);flex-shrink:0;">⚠</span>
@@ -278,7 +274,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
         </div>
       </div>
 
-      <!-- Result -->
       <div class="rp" id="rs" style="display:none;">
         <div class="rp-hd">
           <div>
@@ -296,7 +291,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
       </div>
     </div>
 
-    <!-- History panel -->
     <div class="panel" id="panel-history">
       <div class="hp" id="hp">
         <div class="hist-empty" id="hist-empty">
@@ -312,6 +306,40 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 
 <script>
 var files=[], mode='full', fetchDone=false;
+
+// ===== APIキー保存・復元機能 =====
+var saveAkBtn = document.getElementById('save-ak-btn');
+var akInput = document.getElementById('ak');
+
+window.addEventListener('DOMContentLoaded', function() {
+  var savedKey = localStorage.getItem('savedGeminiApiKey');
+  if (savedKey) {
+    akInput.value = savedKey;
+    akInput.dispatchEvent(new Event('input')); // UIの表示を自動更新させる
+  }
+});
+
+if(saveAkBtn) {
+  saveAkBtn.addEventListener('click', function() {
+    var currentKey = akInput.value.trim();
+    if (currentKey) {
+      localStorage.setItem('savedGeminiApiKey', currentKey);
+      var origText = saveAkBtn.textContent;
+      saveAkBtn.textContent = '✓';
+      saveAkBtn.style.color = 'var(--green)';
+      saveAkBtn.style.borderColor = 'var(--green)';
+      setTimeout(function(){
+        saveAkBtn.textContent = origText;
+        saveAkBtn.style.color = '';
+        saveAkBtn.style.borderColor = '';
+      }, 2000);
+    } else {
+      localStorage.removeItem('savedGeminiApiKey');
+      alert('APIキーの保存を解除しました');
+    }
+  });
+}
+// ================================
 
 /* ── HISTORY (localStorage) ── */
 var HIST_KEY='ocr_history_v1';
